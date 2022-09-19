@@ -1,8 +1,10 @@
-# (TODO: your game's title)
+#  Invisible Three Threes
 
-Author: (TODO: your name)
+STARTING WITH GAME 2 AS BASE CODE
 
-Design: (TODO: In two sentences or fewer, describe what is new and interesting about your game.)
+Author: Daniel Zeng (dlzeng)
+
+Design: It's Connect 4 but with 3 players trying to get 3 in a row.
 
 Screen Shot:
 
@@ -10,6 +12,6 @@ Screen Shot:
 
 How To Play:
 
-(TODO: describe the controls and (if needed) goals/strategy.)
+Use W, A, S, D to move around the camera. Mouse motion rotates the camera and escape to ungrab the mouse. Use the left and right arrows to move between columns and space bar to place a coin in the column. The ordering of the colors go RGB, BGR, RGB, etc. to make it more fair for the last player. Finally, the goal is to get three in a row first :).
 
 This game was built with [NEST](NEST.md).
