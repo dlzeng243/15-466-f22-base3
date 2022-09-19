@@ -50,14 +50,21 @@ struct PlayMode : Mode {
 	//hope to change to: rgb, bgr, rgb, etc. (0 and 5 red, 1 and 4 green, 2 and 3 blue) mod 6
 	int current_coin = 0;
 	
-	// ranges from 0 to 5
-	int column = 2;
+	// ranges from 0 to 7
+	int column = 3;
+	const int w = 8;
+	const int h = 6;
 
 	// 2d array of ints representing the board (-1 means no coin put in yet)
-	int arr[4][6] = {{-1, -1, -1, -1, -1, -1}, {-1, -1, -1, -1, -1, -1}, {-1, -1, -1, -1, -1, -1}, {-1, -1, -1, -1, -1, -1}};
+	int arr[6][8] = {{-1, -1, -1, -1, -1, -1, -1, -1}, 
+					 {-1, -1, -1, -1, -1, -1, -1, -1}, 
+					 {-1, -1, -1, -1, -1, -1, -1, -1},
+					 {-1, -1, -1, -1, -1, -1, -1, -1},
+					 {-1, -1, -1, -1, -1, -1, -1, -1},
+					 {-1, -1, -1, -1, -1, -1, -1, -1}};
 
 	// 1d array of heights so we don't have to check arr every time
-	int heights[6] = {0, 0, 0, 0, 0, 0};
+	int heights[8] = {0, 0, 0, 0, 0, 0, 0, 0};
 
 	// game done state
 	std::string name(int coin);
@@ -65,4 +72,10 @@ struct PlayMode : Mode {
 	bool finished = false;
 	bool drawed = false;
 	std::string winner = "";
+
+	// sounds
+	Sound::Sample red_coin;
+	Sound::Sample green_coin;
+	Sound::Sample blue_coin;
+	void play_coins(int row, int col);
 };

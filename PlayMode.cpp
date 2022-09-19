@@ -16,14 +16,14 @@
 
 GLuint grid_mesh_for_lit_color_texture_program = 0;
 Load< MeshBuffer > grid_mesh(LoadTagDefault, []() -> MeshBuffer const * {
-	MeshBuffer const *ret = new MeshBuffer(data_path("connect.pnct"));
+	MeshBuffer const *ret = new MeshBuffer(data_path("grid.pnct"));
 	grid_mesh_for_lit_color_texture_program = ret->make_vao_for_program(lit_color_texture_program->program);
 	return ret;
 });
 
 // load initial grid scene
 Load< Scene > grid_scene(LoadTagDefault, []() -> Scene const * {
-	return new Scene(data_path("connect.scene"), [&](Scene &scene, Scene::Transform *transform, std::string const &mesh_name){
+	return new Scene(data_path("grid.scene"), [&](Scene &scene, Scene::Transform *transform, std::string const &mesh_name){
 		Mesh const &mesh = grid_mesh->lookup(mesh_name);
 
 		scene.drawables.emplace_back(transform);
@@ -39,11 +39,17 @@ Load< Scene > grid_scene(LoadTagDefault, []() -> Scene const * {
 	});
 });
 
-Load< Sound::Sample > dusty_floor_sample(LoadTagDefault, []() -> Sound::Sample const * {
-	return new Sound::Sample(data_path("dusty-floor.opus"));
+Load< Sound::Sample > red_coin_sample(LoadTagDefault, []() -> Sound::Sample const * {
+	return new Sound::Sample(data_path("red.wav"));
+});
+Load< Sound::Sample > green_coin_sample(LoadTagDefault, []() -> Sound::Sample const * {
+	return new Sound::Sample(data_path("blue.wav"));
+});
+Load< Sound::Sample > blue_coin_sample(LoadTagDefault, []() -> Sound::Sample const * {
+	return new Sound::Sample(data_path("green.wav"));
 });
 
-PlayMode::PlayMode() : scene(*grid_scene) {
+PlayMode::PlayMode() : scene(*grid_scene), red_coin(*red_coin_sample), green_coin(*green_coin_sample), blue_coin(*blue_coin_sample) {
 	auto red_erase = scene.drawables.end();
 	auto green_erase = scene.drawables.end();
 	auto blue_erase = scene.drawables.end();
@@ -81,7 +87,7 @@ PlayMode::PlayMode() : scene(*grid_scene) {
 	//std::cout << "initial pos" << red_draw.transform->position.x << " " << red_draw.transform->position.y << " " << red_draw.transform->position.z << "\n";
 	scene.transforms.emplace_back();
 	Scene::Transform &transform = scene.transforms.back();
-	transform.position = glm::vec3(-1.2f, 0.0f, 10.8f);
+	transform.position = glm::vec3(-1.2f, 0.0f, 2.4f * h + 1.2f);
 	transform.name = "Red";
 	Scene::Drawable initial_red = Scene::Drawable(&transform);
 	initial_red.pipeline = red_draw.pipeline;
@@ -92,9 +98,6 @@ PlayMode::PlayMode() : scene(*grid_scene) {
 	if (scene.cameras.size() != 1) throw std::runtime_error("Expecting scene to have exactly one camera, but it has " + std::to_string(scene.cameras.size()));
 	camera = &scene.cameras.front();
 
-	//start music loop playing:
-	// (note: position will be over-ridden in update())
-	leg_tip_loop = Sound::loop_3D(*dusty_floor_sample, 1.0f, glm::vec3(), 10.0f);
 }
 
 PlayMode::~PlayMode() {
@@ -112,30 +115,31 @@ std::string PlayMode::name(int coin) {
 	}
 }
 
- bool PlayMode::check_win(int row, int col) {
+// need to rewrite to connect 4
+bool PlayMode::check_win(int row, int col) {
 	// check up 3
-	if(row <= 1) {
+	if(row <= 3) {
 		if(arr[row][col] == arr[row + 1][col] && arr[row][col] == arr[row + 2][col]) {
 			winner = name(current_coin);
 			return true;
 		}
 	}
 	// check up right 3
-	if(row <= 1 && col <= 3) {
+	if(row <= 3 && col <= 5) {
 		if(arr[row][col] == arr[row + 1][col + 1] && arr[row][col] == arr[row + 2][col + 2]) {
 			winner = name(current_coin);
 			return true;
 		}
 	}
 	// check right 3
-	if(col <= 3) {
+	if(col <= 5) {
 		if(arr[row][col] == arr[row][col + 1] && arr[row][col] == arr[row][col + 2]) {
 			winner = name(current_coin);
 			return true;
 		}
 	}
 	// check bot right 3
-	if(row >= 2 && col <= 3) {
+	if(row >= 2 && col <= 5) {
 		if(arr[row][col] == arr[row - 1][col + 1] && arr[row][col] == arr[row - 2][col + 2]) {
 			winner = name(current_coin);
 			return true;
@@ -163,7 +167,7 @@ std::string PlayMode::name(int coin) {
 		}
 	}
 	// check up left 3
-	if (row <= 1 && col >= 2) {
+	if (row <= 3 && col >= 2) {
 		if(arr[row][col] == arr[row + 1][col - 1] && arr[row][col] == arr[row + 2][col - 2]) {
 			winner = name(current_coin);
 			return true;
@@ -171,35 +175,52 @@ std::string PlayMode::name(int coin) {
 	}
 
 	// check middle 3 top, down
-	if (1 <= row && row <= 2) {
+	if (1 <= row && row <= 4) {
 		if(arr[row][col] == arr[row + 1][col] && arr[row][col] == arr[row - 1][col]) {
 			winner = name(current_coin);
 			return true;
 		}
 	}
 	// check middle 3 left, right
-	if (1 <= col && col <= 4) {
+	if (1 <= col && col <= 6) {
 		if(arr[row][col] == arr[row][col + 1] && arr[row][col] == arr[row][col - 1]) {
 			winner = name(current_coin);
 			return true;
 		}
 	}
 	// check middle 3 top left, down right
-	if (1 <= row && row <= 2 && 1 <= col && col <= 4) {
+	if (1 <= row && row <= 4 && 1 <= col && col <= 6) {
 		if(arr[row][col] == arr[row - 1][col + 1] && arr[row][col] == arr[row + 1][col - 1]) {
 			winner = name(current_coin);
 			return true;
 		}
-	}
-	// check middle 3 top right, down left
-	if (1 <= row && row <= 2 && 1 <= col && col <= 4) {
 		if(arr[row][col] == arr[row - 1][col - 1] && arr[row][col] == arr[row + 1][col + 1]) {
 			winner = name(current_coin);
 			return true;
 		}
 	}
-
 	return false;
+}
+
+void PlayMode::play_coins(int row, int col) {
+	float volume = 1.0f * exp2(-row);
+	for(int i = 0; i < row; i++) {
+		std::shared_ptr <Sound::PlayingSample> samp = nullptr;
+		if(arr[i][col] == 0) {
+			samp = Sound::play(red_coin, volume);
+		}
+		else if(arr[i][col] == 1) {
+			samp = Sound::play(green_coin, volume);
+		}
+		else {
+			samp = Sound::play(blue_coin, volume);
+		}
+		while(!samp->stopped) {
+			wait(0);
+		}
+		volume *= 2;
+	}
+	return;
 }
 
 bool PlayMode::handle_event(SDL_Event const &evt, glm::uvec2 const &window_size) {
@@ -317,7 +338,7 @@ void PlayMode::update(float elapsed) {
 		// float x_coord = drawable.transform->position.x;
 		// drawable.transform->position = glm::vec3(std::min(2.4f * elapsed + x_coord, 6.0f), drawable.transform->position.y, drawable.transform->position.z);
 		// column = std::min(column + elapsed, 5.0f);
-		if(column < 5) {
+		if(column < 7) {
 			drawable.transform->position += glm::vec3(2.4f, 0.f, 0.f);
 			column += 1;
 		}
@@ -327,21 +348,23 @@ void PlayMode::update(float elapsed) {
 		// place coin into array and grid 
 		int col = column;
 		int row = heights[col];
-		if(row < 4) {
+		if(row < 6) {
 			heights[col] += 1;
-			int val = current_coin % 6;
-			if (val == 3) {
+			int val = current_coin;
+			play_coins(row, col);
+			if (val % 6 == 2 || val % 6 == 3) {
 				val = 2;
 			}
-			else if (val == 4) {
+			else if (val % 6 == 1 || val % 6 == 4) {
 				val = 1;
 			}
-			else if (val == 5) {
+			else if (val % 6 == 0 || val % 6 == 5) {
 				val = 0;
 			}
+
 			arr[row][col] = val;
-			Scene::Transform &transform = scene.transforms.back();
-			transform.position = glm::vec3(-6.0f + 2.4f * col, 0.0f, 1.2f + 2.4f * row);
+			// Scene::Transform &transform = scene.transforms.back();
+			// transform.position = glm::vec3(-1.2f * (w - 1) + 2.4f * col, 0.0f, 1.2f + 2.4f * row);
 			if(current_coin >= 6) {
 				finished = check_win(row, col);
 				if(finished) {
@@ -357,17 +380,19 @@ void PlayMode::update(float elapsed) {
 					space.downs = 0;
 				}
 			}
-			if (current_coin >= 23) {
+			else if (current_coin >= w * h - 1) {
 				drawed = true;
 				finished = true;
 			} 
 			// spawn next coin
 			if(!finished) {
 				current_coin += 1;
+				scene.transforms.pop_back();
+				scene.drawables.pop_back();
 
 				scene.transforms.emplace_back();
 				Scene::Transform &trans = scene.transforms.back();
-				trans.position = glm::vec3(-6.0f + 2.4f * col, 0.0f, 10.8f);
+				trans.position = glm::vec3(-1.2f * (w - 1) + 2.4f * col, 0.0f, 2.4f * h + 1.2f);
 				Scene::Drawable next = Scene::Drawable(&trans);
 				if(current_coin % 6 == 0 || current_coin % 6 == 5) {
 					trans.name = "Red";
@@ -382,8 +407,35 @@ void PlayMode::update(float elapsed) {
 					next.pipeline = blue_draw.pipeline;
 				}
 				scene.drawables.push_back(next);
+
 				// ensures we only place one coin down at a time
 				space.downs += 1;
+			}
+			else {
+				for(int i = 0; i < h; i++) {
+					for(int j = 0; j < w; j++){
+						int coin = arr[i][j];
+						if(coin > -1) {
+							scene.transforms.emplace_back();
+							Scene::Transform &trans = scene.transforms.back();
+							trans.position = glm::vec3(-1.2f * (w - 1) + 2.4f * j, 0.0f, 2.4f * i + 1.2f);
+							Scene::Drawable next = Scene::Drawable(&trans);
+							if(coin == 0) {
+								trans.name = "Red";
+								next.pipeline = red_draw.pipeline;
+							}
+							else if(coin == 1) {
+								trans.name = "Green";
+								next.pipeline = green_draw.pipeline;
+							}
+							else {
+								trans.name = "Blue";
+								next.pipeline = blue_draw.pipeline;
+							}
+							scene.drawables.push_back(next);
+						}
+					}
+				}
 			}
 		}
 	}
