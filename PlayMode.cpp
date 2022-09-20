@@ -217,7 +217,6 @@ void PlayMode::play_coins(int row, int col) {
 			samp = Sound::play(blue_coin, volume);
 		}
 		while(!samp->stopped) {
-			wait(0);
 		}
 		volume *= 2;
 	}
