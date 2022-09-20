@@ -11,7 +11,6 @@
 #include <glm/gtc/type_ptr.hpp>
 
 #include <random>
-#include <sys/wait.h>
 
 // STARTING WITH GAME 2 AS BASE CODE
 
