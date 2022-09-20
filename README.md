@@ -1,6 +1,6 @@
 #  Invisible Three Threes
 
-STARTING WITH GAME 2 AS BASE CODE
+STARTING WITH GAME 2 AS BASE CODE. All models were made in blender by me, and all audio files were generated randomly from https://jfxr.frozenfractal.com.
 
 Author: Daniel Zeng (dlzeng)
 
