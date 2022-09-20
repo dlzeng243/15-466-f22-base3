@@ -104,10 +104,10 @@ PlayMode::~PlayMode() {
 }
 
 std::string PlayMode::name(int coin) {
-	if(coin % 6 == 0 || coin % 6 == 5) {
+	if(coin % 3 == 0) {
 		return "RED";
 	}
-	else if(coin % 6 == 1 || coin % 6 == 4) {
+	else if(coin % 3 == 1) {
 		return "GREEN";
 	}
 	else {
@@ -203,7 +203,7 @@ bool PlayMode::check_win(int row, int col) {
 }
 
 void PlayMode::play_coins(int row, int col) {
-	float volume = 1.0f * exp2(-row);
+	float volume = (float)(1.0f * exp2(-row));
 	for(int i = 0; i < row; i++) {
 		std::shared_ptr <Sound::PlayingSample> samp = nullptr;
 		if(arr[i][col] == 0) {
@@ -317,9 +317,9 @@ void PlayMode::update(float elapsed) {
 	if(left.pressed && left.downs == 1) {
 		Scene::Drawable &drawable = scene.drawables.back();
 		// make sure it's a coin
-		assert(((drawable.transform->name == "Red") && (current_coin % 6 == 0 || current_coin % 6 == 5)) ||
-			   ((drawable.transform->name == "Green") && (current_coin % 6 == 1 || current_coin % 6 == 4)) ||
-			   ((drawable.transform->name == "Blue") && (current_coin % 6 == 2 || current_coin % 6 == 3)));
+		assert(((drawable.transform->name == "Red") && (current_coin % 3 == 0)) ||
+			   ((drawable.transform->name == "Green") && (current_coin % 3 == 1)) ||
+			   ((drawable.transform->name == "Blue") && (current_coin % 3 == 2)));
 		// float x_coord = drawable.transform->position.x;
 		// drawable.transform->position = glm::vec3(std::max(-2.4f * elapsed + x_coord, -6.0f), drawable.transform->position.y, drawable.transform->position.z);
 		// column = std::max(column + elapsed, 0.0f);
@@ -332,9 +332,9 @@ void PlayMode::update(float elapsed) {
 	if(right.pressed && right.downs == 1) {
 		Scene::Drawable &drawable = scene.drawables.back();
 		// make sure it's a coin
-		assert(((drawable.transform->name == "Red") && (current_coin % 6 == 0 || current_coin % 6 == 5)) ||
-			   ((drawable.transform->name == "Green") && (current_coin % 6 == 1 || current_coin % 6 == 4)) ||
-			   ((drawable.transform->name == "Blue") && (current_coin % 6 == 2 || current_coin % 6 == 3)));
+		assert(((drawable.transform->name == "Red") && (current_coin % 3 == 0)) ||
+			   ((drawable.transform->name == "Green") && (current_coin % 3 == 1)) ||
+			   ((drawable.transform->name == "Blue") && (current_coin % 3 == 2)));
 		// float x_coord = drawable.transform->position.x;
 		// drawable.transform->position = glm::vec3(std::min(2.4f * elapsed + x_coord, 6.0f), drawable.transform->position.y, drawable.transform->position.z);
 		// column = std::min(column + elapsed, 5.0f);
@@ -350,17 +350,8 @@ void PlayMode::update(float elapsed) {
 		int row = heights[col];
 		if(row < 6) {
 			heights[col] += 1;
-			int val = current_coin;
+			int val = current_coin % 3;
 			play_coins(row, col);
-			if (val % 6 == 2 || val % 6 == 3) {
-				val = 2;
-			}
-			else if (val % 6 == 1 || val % 6 == 4) {
-				val = 1;
-			}
-			else if (val % 6 == 0 || val % 6 == 5) {
-				val = 0;
-			}
 
 			arr[row][col] = val;
 			// Scene::Transform &transform = scene.transforms.back();
@@ -394,11 +385,11 @@ void PlayMode::update(float elapsed) {
 				Scene::Transform &trans = scene.transforms.back();
 				trans.position = glm::vec3(-1.2f * (w - 1) + 2.4f * col, 0.0f, 2.4f * h + 1.2f);
 				Scene::Drawable next = Scene::Drawable(&trans);
-				if(current_coin % 6 == 0 || current_coin % 6 == 5) {
+				if(current_coin % 3 == 0) {
 					trans.name = "Red";
 					next.pipeline = red_draw.pipeline;
 				}
-				else if(current_coin % 6 == 1 || current_coin % 6 == 4) {
+				else if(current_coin % 3 == 1) {
 					trans.name = "Green";
 					next.pipeline = green_draw.pipeline;
 				}
@@ -525,9 +516,4 @@ void PlayMode::draw(glm::uvec2 const &drawable_size) {
 		}
 	}
 	GL_ERRORS();
-}
-
-glm::vec3 PlayMode::get_leg_tip_position() {
-	//the vertex position here was read from the model in blender:
-	return glm::vec4(-1.26137f, -11.861f, 0.0f, 1.0f);
 }
