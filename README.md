@@ -1,5 +1,7 @@
 #  Invisible Three Threes
 
+Edit: There seems to be no equivalent wait() function in [Windows](https://stackoverflow.com/questions/18013950/error-sys-wait-h-no-such-file-or-directory), so this can only be ran on Linux and MacOS.
+
 STARTING WITH GAME 2 AS BASE CODE. All models were made in blender by me, and all audio files were generated randomly from https://jfxr.frozenfractal.com.
 
 Author: Daniel Zeng (dlzeng)
